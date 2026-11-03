@@ -124,9 +124,6 @@ namespace DA.Repositorio
             return null;
         }
 
-            return null;
-        }
-
         public async Task<BE_RespuestaBD> InsertarRutina(BE_AlertaRutina obj)
         {
             var res = new BE_RespuestaBD();

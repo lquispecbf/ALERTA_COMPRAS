@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CBF_ALERTAS.BE\CBF_ALERTAS.BE.csproj" />
+    <ProjectReference Include="..\CBF_ALERTAS.BL\CBF_ALERTAS.BL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="CBF_ALERTAS.BE">
       <HintPath>..\CBF_ALERTAS.BE\bin\Debug\net8.0\CBF_ALERTAS.BE.dll</HintPath>
     </Reference>
