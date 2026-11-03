@@ -21,18 +21,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CBF_ALERTAS.BE\CBF_ALERTAS.BE.csproj" />
+    <ProjectReference Include="..\CBF_ALERTAS.DA\CBF_ALERTAS.DA.csproj" />
     <ProjectReference Include="..\CBF_ALERTAS.BL\CBF_ALERTAS.BL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="CBF_ALERTAS.BE">
-      <HintPath>..\CBF_ALERTAS.BE\bin\Debug\net8.0\CBF_ALERTAS.BE.dll</HintPath>
-    </Reference>
-    <Reference Include="CBF_ALERTAS.DA">
-      <HintPath>..\CBF_ALERTAS.DA\bin\Debug\net8.0\CBF_ALERTAS.DA.dll</HintPath>
-    </Reference>
-    <Reference Include="CBF_ALERTAS.BL">
-      <HintPath>..\CBF_ALERTAS.BL\bin\Debug\net8.0\CBF_ALERTAS.BL.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>
