@@ -25,4 +25,13 @@
     <ProjectReference Include="..\CBF_ALERTAS.BL\CBF_ALERTAS.BL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="desinstalar.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="instalar.bat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
