@@ -66,6 +66,12 @@ namespace DA.Repositorio
 
                 await con.OpenAsync();
                 using var reader = await cmd.ExecuteReaderAsync();
+
+                bool tienePrecioVenta = false;
+                bool tieneMotivo = false;
+                try { tienePrecioVenta = reader.GetOrdinal("PRECIO_VENTA_GENERAL") >= 0; } catch { }
+                try { tieneMotivo = reader.GetOrdinal("MOTIVO_ALERTA") >= 0; } catch { }
+
                 while (await reader.ReadAsync())
                 {
                     lista.Add(new BE_CompraMedicamentoHana
@@ -81,6 +87,8 @@ namespace DA.Repositorio
                         PrecioCompra = reader["PRECIO_COMPRA"] != DBNull.Value ? Convert.ToDecimal(reader["PRECIO_COMPRA"]) : 0,
                         CostoRegistrado = reader["COSTO_REGISTRADO"] != DBNull.Value ? Convert.ToDecimal(reader["COSTO_REGISTRADO"]) : 0,
                         DiferenciaMonto = reader["DIFERENCIA_MONTO"] != DBNull.Value ? Convert.ToDecimal(reader["DIFERENCIA_MONTO"]) : 0,
+                        PrecioVentaGeneral = tienePrecioVenta && reader["PRECIO_VENTA_GENERAL"] != DBNull.Value ? Convert.ToDecimal(reader["PRECIO_VENTA_GENERAL"]) : 0,
+                        MotivoAlerta = tieneMotivo && reader["MOTIVO_ALERTA"] != DBNull.Value ? reader["MOTIVO_ALERTA"]?.ToString() ?? "COMPRA_GE_COSTO" : "COMPRA_GE_COSTO",
                         AlmacenCodigo = reader["ALMACEN_CODIGO"]?.ToString() ?? string.Empty,
                         EnvWms = reader["ENV_WMS"]?.ToString() ?? "Y"
                     });

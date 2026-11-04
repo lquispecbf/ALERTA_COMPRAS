@@ -30,41 +30,73 @@ namespace BL.Rutinas
         {
             try
             {
-                _logger.LogInformation("Ejecutando escaneo en SAP HANA para rutina {Rutina} (Fecha: {Fecha:yyyy-MM-dd})...", CodigoRutina, DateTime.Today);
+                int diasAtras = Math.Max(0, configuracion.DiasAtras);
+                int nuevosAlertadosTotal = 0;
 
-                // Consulta de solo lectura a SAP HANA
-                var compras = await _hanaDa.ConsultarComprasMedicamentoVsCosto(fechaEvaluacion: DateTime.Today);
-                if (compras == null || compras.Count == 0)
-                {
-                    _logger.LogInformation("No se detectaron compras que cumplan la condición en este ciclo.");
-                    return;
-                }
-
-                _logger.LogInformation("Detectados {Total} registros potenciales en SAP HANA. Verificando idempotencia en SQL Server...", compras.Count);
-
-                int nuevosAlertados = 0;
-                foreach (var compra in compras)
+                for (int d = diasAtras; d >= 0; d--)
                 {
                     if (stoppingToken.IsCancellationRequested)
                         break;
 
-                    // Registro transaccional en SQL Server con control de idempotencia
-                    var res = await _notificacionDa.RegistrarEventoCompra(compra, configuracion.IdRutina);
-                    if (res.Codigo == 1)
+                    var fechaEval = DateTime.Today.AddDays(-d);
+                    _logger.LogInformation("Ejecutando escaneo en SAP HANA para rutina {Rutina} (Fecha: {Fecha:yyyy-MM-dd}, Días Atrás: {Dias})...", 
+                        CodigoRutina, fechaEval, d);
+
+                    // Consulta de solo lectura a SAP HANA
+                    var compras = await _hanaDa.ConsultarComprasMedicamentoVsCosto(fechaEvaluacion: fechaEval);
+                    if (compras == null || compras.Count == 0)
                     {
-                        nuevosAlertados++;
-                        _logger.LogWarning("¡ALERTA GENERADA! OC #{DocNum} (DocEntry: {DocEntry}, Line: {LineNum}) | Item: {ItemCode} - {ItemName} | Compra: S/ {Precio} >= Costo: S/ {Costo}",
-                            compra.NumeroDocumento, compra.ClaveDocumento, compra.LineaDocumento, compra.ItemCode, compra.ItemName, compra.PrecioCompra, compra.CostoRegistrado);
+                        _logger.LogDebug("Sin registros que cumplan condiciones en SAP HANA para fecha {Fecha:yyyy-MM-dd}.", fechaEval);
+                        continue;
                     }
-                    else
+
+                    _logger.LogInformation("Detectados {Total} registros potenciales en SAP HANA para {Fecha:yyyy-MM-dd}. Verificando idempotencia en SQL Server...", 
+                        compras.Count, fechaEval);
+
+                    int nuevosAlertadosDia = 0;
+                    foreach (var compra in compras)
                     {
-                        _logger.LogDebug("OC #{DocNum} Line {LineNum} ya fue alertada previamente. Omitiendo.", compra.NumeroDocumento, compra.LineaDocumento);
+                        if (stoppingToken.IsCancellationRequested)
+                            break;
+
+                        // Registro transaccional en SQL Server con control de idempotencia
+                        var res = await _notificacionDa.RegistrarEventoCompra(compra, configuracion.IdRutina);
+                        if (res.Codigo == 1)
+                        {
+                            nuevosAlertadosDia++;
+                            nuevosAlertadosTotal++;
+
+                            if (compra.MotivoAlerta == "COMPRA_EQ_VENTA_GRAL")
+                            {
+                                _logger.LogWarning("¡ALERTA GENERADA! [COMPRA = VENTA GENERAL] OC #{DocNum} (DocEntry: {DocEntry}, Line: {LineNum}) | Item: {ItemCode} - {ItemName} | Compra: S/ {Precio} == Venta Gral: S/ {VentaGral}",
+                                    compra.NumeroDocumento, compra.ClaveDocumento, compra.LineaDocumento, compra.ItemCode, compra.ItemName, compra.PrecioCompra, compra.PrecioVentaGeneral);
+                            }
+                            else if (compra.MotivoAlerta == "AMBAS_CONDICIONES")
+                            {
+                                _logger.LogWarning("¡ALERTA GENERADA! [AMBAS CONDICIONES] OC #{DocNum} (DocEntry: {DocEntry}, Line: {LineNum}) | Item: {ItemCode} - {ItemName} | Compra: S/ {Precio} >= Costo: S/ {Costo} Y == Venta Gral: S/ {VentaGral}",
+                                    compra.NumeroDocumento, compra.ClaveDocumento, compra.LineaDocumento, compra.ItemCode, compra.ItemName, compra.PrecioCompra, compra.CostoRegistrado, compra.PrecioVentaGeneral);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("¡ALERTA GENERADA! [COMPRA >= COSTO SAP] OC #{DocNum} (DocEntry: {DocEntry}, Line: {LineNum}) | Item: {ItemCode} - {ItemName} | Compra: S/ {Precio} >= Costo: S/ {Costo}",
+                                    compra.NumeroDocumento, compra.ClaveDocumento, compra.LineaDocumento, compra.ItemCode, compra.ItemName, compra.PrecioCompra, compra.CostoRegistrado);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogDebug("OC #{DocNum} Line {LineNum} ya fue alertada previamente. Omitiendo.", compra.NumeroDocumento, compra.LineaDocumento);
+                        }
+                    }
+
+                    if (nuevosAlertadosDia > 0)
+                    {
+                        _logger.LogInformation("Fecha {Fecha:yyyy-MM-dd}: {Total} nuevas alertas registradas y encoladas.", fechaEval, nuevosAlertadosDia);
                     }
                 }
 
-                if (nuevosAlertados > 0)
+                if (nuevosAlertadosTotal > 0)
                 {
-                    _logger.LogInformation("Ciclo completado. {Total} nuevas alertas registradas y encoladas para notificación.", nuevosAlertados);
+                    _logger.LogInformation("Ciclo completado. {Total} nuevas alertas registradas en total.", nuevosAlertadosTotal);
                 }
             }
             catch (Exception ex)

@@ -49,8 +49,14 @@ namespace DA.Repositorio
             cmd.Parameters.Add(new SqlParameter("@PRECIO_COMPRA", SqlDbType.Decimal) { Precision = 18, Scale = 4, Value = evento.PrecioCompra });
             cmd.Parameters.Add(new SqlParameter("@COSTO_REGISTRADO", SqlDbType.Decimal) { Precision = 18, Scale = 4, Value = evento.CostoRegistrado });
             cmd.Parameters.Add(new SqlParameter("@ALMACEN_CODIGO", SqlDbType.VarChar, 50) { Value = (object?)evento.AlmacenCodigo ?? DBNull.Value });
+            string detalleJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                motivoAlerta = string.IsNullOrWhiteSpace(evento.MotivoAlerta) ? "COMPRA_GE_COSTO" : evento.MotivoAlerta,
+                precioVentaGeneral = evento.PrecioVentaGeneral
+            });
+
             cmd.Parameters.Add(new SqlParameter("@ENV_WMS", SqlDbType.Char, 1) { Value = evento.EnvWms });
-            cmd.Parameters.Add(new SqlParameter("@DETALLE_JSON", SqlDbType.NVarChar, -1) { Value = DBNull.Value });
+            cmd.Parameters.Add(new SqlParameter("@DETALLE_JSON", SqlDbType.NVarChar, -1) { Value = (object)detalleJson ?? DBNull.Value });
 
             await con.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();

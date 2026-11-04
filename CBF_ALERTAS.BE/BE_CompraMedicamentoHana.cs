@@ -15,6 +15,8 @@ namespace BE
         public decimal PrecioCompra { get; set; }
         public decimal CostoRegistrado { get; set; }
         public decimal DiferenciaMonto { get; set; }
+        public decimal PrecioVentaGeneral { get; set; }
+        public string MotivoAlerta { get; set; } = "COMPRA_GE_COSTO";
         public string? AlmacenCodigo { get; set; }
         public string EnvWms { get; set; } = "Y";
     }
