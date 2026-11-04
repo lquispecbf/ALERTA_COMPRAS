@@ -137,7 +137,7 @@ namespace DA.Repositorio
             cmd.Parameters.Add(new SqlParameter("@NOMBRE", SqlDbType.VarChar, 150) { Value = obj.Nombre });
             cmd.Parameters.Add(new SqlParameter("@DESCRIPCION", SqlDbType.VarChar, 500) { Value = (object?)obj.Descripcion ?? DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@INTERVALO_SEGUNDOS", SqlDbType.Int) { Value = obj.IntervaloSegundos });
-            cmd.Parameters.Add(new SqlParameter("@DIAS_ATRAS", SqlDbType.Int) { Value = obj.DiasAtras <= 0 ? 3 : obj.DiasAtras });
+            cmd.Parameters.Add(new SqlParameter("@DIAS_ATRAS", SqlDbType.Int) { Value = obj.DiasAtras < 0 ? 3 : obj.DiasAtras });
             cmd.Parameters.Add(new SqlParameter("@HABILITADO", SqlDbType.Bit) { Value = obj.Habilitado });
             cmd.Parameters.Add(new SqlParameter("@CANAL_INTRANET", SqlDbType.Bit) { Value = obj.CanalIntranet });
             cmd.Parameters.Add(new SqlParameter("@CANAL_CORREO", SqlDbType.Bit) { Value = obj.CanalCorreo });
@@ -169,7 +169,7 @@ namespace DA.Repositorio
             cmd.Parameters.Add(new SqlParameter("@NOMBRE", SqlDbType.VarChar, 150) { Value = obj.Nombre });
             cmd.Parameters.Add(new SqlParameter("@DESCRIPCION", SqlDbType.VarChar, 500) { Value = (object?)obj.Descripcion ?? DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@INTERVALO_SEGUNDOS", SqlDbType.Int) { Value = obj.IntervaloSegundos });
-            cmd.Parameters.Add(new SqlParameter("@DIAS_ATRAS", SqlDbType.Int) { Value = obj.DiasAtras <= 0 ? 3 : obj.DiasAtras });
+            cmd.Parameters.Add(new SqlParameter("@DIAS_ATRAS", SqlDbType.Int) { Value = obj.DiasAtras < 0 ? 3 : obj.DiasAtras });
             cmd.Parameters.Add(new SqlParameter("@HABILITADO", SqlDbType.Bit) { Value = obj.Habilitado });
             cmd.Parameters.Add(new SqlParameter("@CANAL_INTRANET", SqlDbType.Bit) { Value = obj.CanalIntranet });
             cmd.Parameters.Add(new SqlParameter("@CANAL_CORREO", SqlDbType.Bit) { Value = obj.CanalCorreo });
