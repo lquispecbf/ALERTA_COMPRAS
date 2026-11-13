@@ -5,9 +5,9 @@ echo ===============================================
 echo  INSTALANDO SERVICIO CBF ALERTAS COMPRAS
 echo ===============================================
 
-set SERVICE_NAME=CBFAlertasCompras
+set SERVICE_NAME=CBF_AlertasCompras
 set SERVICE_DISPLAY_NAME=CBFAlertasCompras
-set SERVICE_DESCRIPTION=Servicio de Alertas de Compras
+set SERVICE_DESCRIPTION=Servicio de Alertas de Compras valor de la compra, mayor al precio promedio, o igual al precio de la lista general,
 set SERVICE_EXE=%~dp0CBF_ALERTAS.Servicio.exe
 
 rem Verificar que el archivo exista
